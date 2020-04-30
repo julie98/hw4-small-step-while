@@ -13,12 +13,21 @@ class NodeVisitor(object):
     def generic_visit(self, node):
         raise Exception('No visit_{} method'.format(type(node).__name__))
 
+    def show(self, node):
+        method_name = 'show_' + type(node).__name__  # node type name
+        visitor = getattr(self, method_name, self.generic_show)
+        return visitor(node)
+
+    def generic_show(self, node):
+        raise Exception('No show_{} method'.format(type(node).__name__))
+
 
 class Interpreter(NodeVisitor):
     GLOBAL_SCOPE = {}
 
     def __init__(self, parser):
         self.parser = parser
+        self.tree = None
 
     def visit_BinOp(self, node):
         type = node.op.type
@@ -41,6 +50,13 @@ class Interpreter(NodeVisitor):
         elif type == TokenType.OR:
             return self.visit(node.left) or self.visit(node.right)
 
+    def show_BinOp(self, node):
+        repr = '(' + self.show(node.left) + node.token.value + self.show(node.right) + ')'
+        return repr
+
+    def show_Num(self, node):
+        return str(node.value)
+
     def visit_Num(self, node):
         return node.value
 
@@ -58,11 +74,18 @@ class Interpreter(NodeVisitor):
         elif op == TokenType.MINUS:
             return -self.visit(node.expr)
 
+    def show_UnaryOp(self, node):
+        repr = node.token.value + self.show(node.expr)
+        return repr
+
     def visit_Boolean(self, node):
         if node.bool == 'true':
             return True
         else:
             return False
+
+    def show_Boolean(self, node):
+        return node.bool
 
     def visit_Var(self, node):
         var_name = node.token.value
@@ -72,62 +95,113 @@ class Interpreter(NodeVisitor):
         else:
             return val
 
+    def show_Var(self, node):
+        return node.token.value
+
     def visit_Assign(self, node):
         var_name = node.left.token.value
         self.GLOBAL_SCOPE[var_name] = self.visit(node.right)
         node.left.value = self.GLOBAL_SCOPE[var_name]
+        node.eval = True
+
+    def show_Assign(self, node):
+        if node.eval:
+            return 'skip'
+        repr = self.show(node.left) + ' ' + node.op.value + ' ' + self.show(node.right)
+        return repr
+
+    def get_state(self):
+        if len(self.GLOBAL_SCOPE) == 0:
+            return '{}'
+        else:
+            result = '{'
+            for key, value in sorted(self.GLOBAL_SCOPE.items()):  # print by sorted key ASCII order
+                result += key + ' → ' + str(value) + ', '
+            result = result[:-2]
+            result += '}'
+            return result
+
+    def show_IfOp(self, node):
+        if node.eval:
+            return 'skip'
+        repr = 'if ' + self.show(node.expr) + ' then ' + '{ ' + self.show(node.left) + ' }'
+        if node.right:
+            repr += ' else { ' + self.show(node.right) + ' }'
+        return repr
 
     def visit_IfOp(self, node):
+        arrow = '⇒ '
         bool = self.visit(node.expr)
         if bool == True:
-            return self.visit(node.left)
+            print(arrow + self.show(node.left)+ ', ' + self.get_state())
+            self.visit(node.left)
+            #print(arrow + self.show(node.left)+ ', ' + self.get_state())
         else:
-            return self.visit(node.right)
+            print(arrow + self.show(node.left)+ ', ' + self.get_state())
+            self.visit(node.right)
+            #print(arrow + self.show(node.right)+ ', ' + self.get_state())
+        node.eval = True
+
+    def show_WhileOp(self, node):
+        if node.eval:
+            return 'skip'
+        repr = 'while ' + self.show(node.left) + ' do ' + '{ ' + node.do_stmt_str + ' }'
+        return repr
 
     def visit_WhileOp(self, node):
+        arrow = '⇒ '
+        node.do_stmt_str = self.show(node.right)
+        counter = 0
         while self.visit(node.left) == True:
+            print(arrow + node.do_stmt_str + '; ' + self.show(node) + ', ' + self.get_state())
             self.visit(node.right)
+            print(arrow + self.show(node.right) + '; ' + self.show(node) + ', ' + self.get_state())
+            print(arrow + self.show(node) + ', ' + self.get_state())
+            counter += 1
+            if counter >= 1000:
+                break
 
     def visit_NoOp(self, node):
         pass
 
+    def show_commands(self, node):
+        repr = '⇒ '
+        for child in node:
+            repr += self.show(child) + '; '
+        repr = repr[:-2]
+        repr += ', ' + self.get_state()
+        return repr
+
     def visit_Compound(self, node):
-        for child in node.children:
-            self.visit(child)
+        children = node.children
+        self.visit(children[0])
+        if len(children) > 1:
+            for child in children[1:]:
+                index_of_child = children.index(child)
+                print(self.show_commands(children[index_of_child-1:]))
+                print(self.show_commands(children[index_of_child:]))
+                self.visit(child)
+        print('⇒ skip, ' + self.get_state())
 
     def interpret(self):
         tree = self.parser.parse()
+        self.tree = tree
+        #print(tree.children)
         if tree is None:
             return ''
         return self.visit(tree)
 
 
-def print_result(dict):
-    if len(dict) == 0:
-        print('{}')
-    else:
-        result = '{'
-        for key, value in sorted(dict.items()):  # print by sorted key ASCII order
-            result += key + ' → ' + str(value) + ', '
-        result = result[:-2]
-        result += '}'
-        print(result)
-
 def main():
-    text = 'if 0<x ∨ 4 = 4 then x := 7 else x:= 9'
+    text = '{ while true do x := x - 3 }'
     #text = input()
     lexer = Lexer(text)
-    # while True:
-    #     token = lexer.get_next_token()
-    #     print(token)
-    #     if token.type == 'EOF':
-    #         break
 
     parser = Parser(lexer)
     inter = Interpreter(parser)
-    result = inter.interpret()
-    dict = inter.GLOBAL_SCOPE
-    print_result(dict)
+    inter.interpret()
+    #state = inter.get_state()
+    #print(state)
 
 
 if __name__ == '__main__':

@@ -70,10 +70,6 @@ class Lexer:
                 self.advance()
                 self.advance()
                 return Token(TokenType.ASSIGN, ':=')
-            if self.current_char == ":" and self.peek() != '=':
-                self.advance()
-                return Token(TokenType.COLON, ':')
-
             # single-character token
             try:
                 # get enum member by value, e.g.
@@ -84,7 +80,7 @@ class Lexer:
                 self.error()
             else:
                 # create a token with a single-character lexeme as its value
-                token = Token(type=token_type, value=token_type.value)
+                token = Token(type=token_type, value=token_type.value) # e.g. ';'
                 self.advance()
                 return token
 
@@ -143,21 +139,37 @@ class Parser:
         # "while" <expr> "do" <statement>
         token = self.current_token
         self.eat(TokenType.WHILE)
+        if self.current_token.type == TokenType.LPAREN:
+            self.eat(TokenType.LPAREN)
         left = self.expr()
+        if self.current_token.type == TokenType.RPAREN:
+            self.eat(TokenType.RPAREN)
         self.eat(TokenType.DO)
+        if self.current_token.type == TokenType.LCURLY:
+            self.eat(TokenType.LCURLY)
         right = self.statement()
+        if self.current_token.type == TokenType.RCURLY:
+            self.eat(TokenType.RCURLY)
         return WhileOp(left, token, right)
 
     def statement_list(self):
-        """ statement_list = statement | statement ";" statement_list
+        """ statement_list = statement |  statement ";" '{' statement_list '}'
         """
+        if self.current_token.type == TokenType.LCURLY:
+            self.eat(TokenType.LCURLY)
         node = self.statement()
         root = Compound()
         root.children.append(node)
 
         while self.current_token.type == TokenType.SEMI:
             self.eat(TokenType.SEMI)
+            if self.current_token.type == TokenType.LCURLY:
+                self.eat(TokenType.LCURLY)
             root.children.append(self.statement())
+            if self.current_token.type == TokenType.RCURLY:
+                self.eat(TokenType.RCURLY)
+        if self.current_token.type == TokenType.RCURLY:
+            self.eat(TokenType.RCURLY)
 
         if self.current_token.type == TokenType.ID:
             self.error()

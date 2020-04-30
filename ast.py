@@ -11,6 +11,7 @@ class Assign(AST):
         self.left = left
         self.op = op
         self.right = right
+        self.eval = False
 
 class BinOp(AST):
     def __init__(self, left, op, right):
@@ -53,12 +54,15 @@ class IfOp(AST):
         self.token = self.op = op
         self.left = then_stmt
         self.right = optional_else
+        self.eval = False
 
 class WhileOp(AST):
     def __init__(self, expr, op, do_stmt):
         self.left = expr
         self.token = self.op = op
         self.right = do_stmt
+        self.do_stmt_str = None
+        self.eval = False
 
 class CondiOp(AST):
     def __init__(self, expr, left, right):
