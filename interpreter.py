@@ -148,14 +148,14 @@ class Interpreter(NodeVisitor):
             s += command + '; '
         return s[:-2]
 
-    def get_Commands(self, children):
+    def get_Commands(self, children):  # input: list of command(s)
         repr = []
         for child in children:
             child.eval = False
             repr.append(self.show(child))
         return repr
 
-    def show_Commands(self, children):
+    def show_Commands(self, children):  # input: list of command(s)
         repr = '⇒ '
         for child in children:
             repr += self.show(child) + '; '
@@ -238,7 +238,7 @@ class Interpreter(NodeVisitor):
 
 
 def main():
-    #text = 'a := 369 ; b := 1107 ; while ¬ ( a = b ) do { if a < b then b := b - a else a := a - b }'
+    #text = 'while x < 8 do x := x + 2'
     text = input()
     lexer = Lexer(text)
 
