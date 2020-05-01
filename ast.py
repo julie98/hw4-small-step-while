@@ -35,13 +35,19 @@ class Compound(AST):
     def __init__(self):
         self.children = []
 
+class Commands(AST):
+    # inner commands
+    def __init__(self):
+        self.children = []
+
 class Var(AST):
     def __init__(self, token):
         self.token = token
         self.value = 0
 
 class NoOp(AST):
-    pass
+    def __init__(self):
+        self.eval = False
 
 class Boolean(AST):
     def __init__(self, token, bool):
@@ -61,7 +67,6 @@ class WhileOp(AST):
         self.left = expr
         self.token = self.op = op
         self.right = do_stmt
-        self.do_stmt_str = None
         self.eval = False
 
 class CondiOp(AST):

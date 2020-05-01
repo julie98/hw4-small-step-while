@@ -59,6 +59,7 @@ class Lexer:
 
     def get_next_token(self):
         while self.current_char is not None:
+
             if self.current_char.isspace():
                 self.skip_whitespace()
                 continue
@@ -145,12 +146,31 @@ class Parser:
         if self.current_token.type == TokenType.RPAREN:
             self.eat(TokenType.RPAREN)
         self.eat(TokenType.DO)
+
+        right = self.commands()
+        node = WhileOp(left, token, right)
+        return node
+
+    def commands(self):
+        """ commands = statement |  statement ";" '{' statement_list '}'
+        """
         if self.current_token.type == TokenType.LCURLY:
             self.eat(TokenType.LCURLY)
-        right = self.statement()
-        if self.current_token.type == TokenType.RCURLY:
+            node = self.statement()
+            root = Commands()
+            root.children.append(node)
+            while self.current_token.type == TokenType.SEMI:
+                self.eat(TokenType.SEMI)
+                root.children.append(self.statement())
             self.eat(TokenType.RCURLY)
-        return WhileOp(left, token, right)
+            return root
+
+        node = self.statement()
+        root = Commands()
+        root.children.append(node)
+        if self.current_token.type == TokenType.ID:
+            self.error()
+        return root
 
     def statement_list(self):
         """ statement_list = statement |  statement ";" '{' statement_list '}'
@@ -160,8 +180,8 @@ class Parser:
         node = self.statement()
         root = Compound()
         root.children.append(node)
-
         while self.current_token.type == TokenType.SEMI:
+
             self.eat(TokenType.SEMI)
             if self.current_token.type == TokenType.LCURLY:
                 self.eat(TokenType.LCURLY)

@@ -137,34 +137,75 @@ class Interpreter(NodeVisitor):
             self.visit(node.left)
             #print(arrow + self.show(node.left)+ ', ' + self.get_state())
         else:
-            print(arrow + self.show(node.left)+ ', ' + self.get_state())
+            print(arrow + self.show(node.right)+ ', ' + self.get_state())
             self.visit(node.right)
             #print(arrow + self.show(node.right)+ ', ' + self.get_state())
         node.eval = True
 
+    def get_do_stmts(self, stmt_list):
+        s = ''
+        for command in stmt_list:
+            s += command + '; '
+        return s[:-2]
+
+    def get_Commands(self, children):
+        repr = []
+        for child in children:
+            child.eval = False
+            repr.append(self.show(child))
+        return repr
+
+    def show_Commands(self, children):
+        repr = '⇒ '
+        for child in children:
+            repr += self.show(child) + '; '
+        return repr[:-2]
+
+    def visit_Commands(self, node):
+        children = node.right.children
+        self.visit(children[0])
+        if len(children) == 1:
+            print('⇒ skip' + '; ' + self.show(node) + ', ' + self.get_state())
+        if len(children) > 1:
+            for child in children[1:]:
+                index_of_child = children.index(child)
+                print(self.show_Commands(children[index_of_child-1:]) + '; ' + self.show(node) + ', ' + self.get_state())
+
+                print(self.show_Commands(children[index_of_child:]) + '; ' + self.show(node) + ', ' + self.get_state())
+                self.visit(child)
+                print(self.show_Commands(children[index_of_child:]) + '; ' + self.show(node) + ', ' + self.get_state())
+
     def show_WhileOp(self, node):
         if node.eval:
             return 'skip'
-        repr = 'while ' + self.show(node.left) + ' do ' + '{ ' + node.do_stmt_str + ' }'
+        s = self.get_Commands(node.right.children)
+        do_stmts = self.get_do_stmts(s)
+
+        repr = 'while ' + self.show(node.left) + ' do ' + '{ ' + do_stmts + ' }'
         return repr
 
     def visit_WhileOp(self, node):
         arrow = '⇒ '
-        node.do_stmt_str = self.show(node.right)
         counter = 0
+
         while self.visit(node.left) == True:
-            print(arrow + node.do_stmt_str + '; ' + self.show(node) + ', ' + self.get_state())
-            self.visit(node.right)
-            print(arrow + self.show(node.right) + '; ' + self.show(node) + ', ' + self.get_state())
-            print(arrow + self.show(node) + ', ' + self.get_state())
+            print(self.show_Commands(node.right.children) + '; ' + self.show_WhileOp(node) +', ' + self.get_state())
+            self.visit_Commands(node)
             counter += 1
-            if counter >= 1000:
-                break
+            print(arrow + self.show(node) + ', ' + self.get_state())
+            if counter >= 3333:
+                print(self.show_Commands(node.right.children) + '; ' + self.show(node) + ', ' + self.get_state())
+                return
+
+        node.eval = True
 
     def visit_NoOp(self, node):
         pass
 
-    def show_commands(self, node):
+    def show_NoOp(self, node):
+        return
+
+    def show_statements(self, node):
         repr = '⇒ '
         for child in node:
             repr += self.show(child) + '; '
@@ -174,14 +215,18 @@ class Interpreter(NodeVisitor):
 
     def visit_Compound(self, node):
         children = node.children
+
         self.visit(children[0])
         if len(children) > 1:
             for child in children[1:]:
                 index_of_child = children.index(child)
-                print(self.show_commands(children[index_of_child-1:]))
-                print(self.show_commands(children[index_of_child:]))
+                print(self.show_statements(children[index_of_child-1:]))
+                print(self.show_statements(children[index_of_child:]))
                 self.visit(child)
-        print('⇒ skip, ' + self.get_state())
+        if children[-1].eval:
+            print('⇒ skip, ' + self.get_state())
+        else:
+            return
 
     def interpret(self):
         tree = self.parser.parse()
@@ -193,11 +238,12 @@ class Interpreter(NodeVisitor):
 
 
 def main():
-    text = '{ while true do x := x - 3 }'
-    #text = input()
+    #text = 'a := 369 ; b := 1107 ; while ¬ ( a = b ) do { if a < b then b := b - a else a := a - b }'
+    text = input()
     lexer = Lexer(text)
 
     parser = Parser(lexer)
+
     inter = Interpreter(parser)
     inter.interpret()
     #state = inter.get_state()

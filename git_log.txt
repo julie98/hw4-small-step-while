@@ -1,3 +1,21 @@
+commit 0c96d796f4973743d3db0865c382584c75e3ed0a
+Author: doubleplusplus <jiadeng@hotmail.com>
+Date:   Thu Apr 30 15:48:12 2020 -0700
+
+    easy tests done
+
+commit 30163bb3928d930282ca37badb613318e704a957
+Author: doubleplusplus <jiadeng@hotmail.com>
+Date:   Sun Apr 26 20:07:09 2020 -0700
+
+    ast, parser
+
+commit 5435d6990f5032a45fcf16b41cf4376c4807a0e2
+Author: doubleplusplus <jiadeng@hotmail.com>
+Date:   Sun Apr 26 15:09:56 2020 -0700
+
+    correct tests
+
 commit debe0e3ec991bd0197f8b57e75aba2de689ca8fe
 Author: doubleplusplus <jiadeng@hotmail.com>
 Date:   Sun Apr 26 13:34:37 2020 -0700
