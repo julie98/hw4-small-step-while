@@ -238,7 +238,7 @@ class Interpreter(NodeVisitor):
 
 
 def main():
-    #text = 'while x < 8 do x := x + 2'
+    #text = 'a := 369 ; b := 1107 ; while ¬ ( a = b ) do { if a < b then b := b - a else a := a - b }'
     text = input()
     lexer = Lexer(text)
 
