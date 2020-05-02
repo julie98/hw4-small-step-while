@@ -1,3 +1,21 @@
+commit b353a3d1112d6b48baafe0a0520f55208ba2974b
+Author: doubleplusplus <jiadeng@hotmail.com>
+Date:   Fri May 1 15:46:12 2020 -0700
+
+    median-4,5,6 failed
+
+commit 4c8a48288071c6fb14509ac70427520241696a21
+Author: doubleplusplus <jiadeng@hotmail.com>
+Date:   Fri May 1 11:44:19 2020 -0700
+
+    extra tests
+
+commit 392a4ab0136815295909cdafb105c4782ea4a487
+Author: doubleplusplus <jiadeng@hotmail.com>
+Date:   Fri May 1 03:24:19 2020 -0700
+
+    easy and hard tests complete
+
 commit 0c96d796f4973743d3db0865c382584c75e3ed0a
 Author: doubleplusplus <jiadeng@hotmail.com>
 Date:   Thu Apr 30 15:48:12 2020 -0700
