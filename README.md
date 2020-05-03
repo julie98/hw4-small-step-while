@@ -4,8 +4,8 @@
 Authors: Jamie Deng, Haoyu Zhu
 
 On this homework, we worked together for 3 hours,
-Jamie worked independently for 20 hours,
-and Haoyu worked independently for 11 hours.
+Jamie worked independently for 15 hours,
+and Haoyu worked independently for 8 hours.
 
 ---------------------------------------------------------------
 
