@@ -1,5 +1,14 @@
 # hw4-small-step-while
 
+---------------------------------------------------------------
+Authors: Jamie Deng, Haoyu Zhu
+
+On this homework, we worked together for 3 hours,
+Jamie worked independently for 20 hours,
+and Haoyu worked independently for 11 hours.
+
+---------------------------------------------------------------
+
 - CSE 210A hw4, small step WHILE, in Python 3.7
 
 - run `test.sh` to perform test cases, no external library needed
