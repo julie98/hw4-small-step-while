@@ -252,8 +252,8 @@ class Interpreter(NodeVisitor):
 
 
 def main():
-    text = 'x := 3 ; y := 5; if ( x < y ) then x := x + 1 else x := x - 1'
-    #text = input()
+    #text = 'i := -1 ; fact := 1 ; while 0 < i do { fact := fact * i; i := i - 1 }'
+    text = input()
 
     lexer = Lexer(text)
     parser = Parser(lexer)

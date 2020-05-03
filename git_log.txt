@@ -1,3 +1,17 @@
+commit dfa3993b2acda0d7b8871cc4b739b665634070a4
+Author: doubleplusplus <jiadeng@hotmail.com>
+Date:   Sun May 3 03:19:44 2020 -0700
+
+    pass all tests
+
+commit dd372d8027bd88df0601d859b46fc08360625444
+Author: doubleplusplus <jiadeng@hotmail.com>
+Date:   Fri May 1 22:48:43 2020 -0700
+
+    small improves
+    
+    add comments, delete useless lines
+
 commit b353a3d1112d6b48baafe0a0520f55208ba2974b
 Author: doubleplusplus <jiadeng@hotmail.com>
 Date:   Fri May 1 15:46:12 2020 -0700
