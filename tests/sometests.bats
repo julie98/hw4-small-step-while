@@ -1,10 +1,12 @@
 load harness
 
 @test "extra-1" {
-  check 'x := 3 ; if ( x < 5 ) then x := x + 1 else x := x - 1' '⇒ skip; if (x<5) then { x := (x+1) } else { x := (x-1) }, {x → 3}
-⇒ if (x<5) then { x := (x+1) } else { x := (x-1) }, {x → 3}
-⇒ x := (x+1), {x → 3}
-⇒ skip, {x → 4}'
+  check 'x := 3 ; y := 5; if ( x < y ) then x := x + 1 else x := x - 1' '⇒ skip; y := 5; if (x<y) then { x := (x+1) } else { x := (x-1) }, {x → 3}
+⇒ y := 5; if (x<y) then { x := (x+1) } else { x := (x-1) }, {x → 3}
+⇒ skip; if (x<y) then { x := (x+1) } else { x := (x-1) }, {x → 3, y → 5}
+⇒ if (x<y) then { x := (x+1) } else { x := (x-1) }, {x → 3, y → 5}
+⇒ x := (x+1), {x → 3, y → 5}
+⇒ skip, {x → 4, y → 5}'
 }
 
 @test "extra-2" {

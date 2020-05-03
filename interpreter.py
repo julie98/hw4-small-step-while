@@ -124,8 +124,10 @@ class Interpreter(NodeVisitor):
     def show_IfOp(self, node):
         if node.eval:
             return 'skip'
+        node.left.eval = False
         repr = 'if ' + self.show(node.expr) + ' then ' + '{ ' + self.show(node.left) + ' }'
         if node.right:
+            node.right.eval = False
             repr += ' else { ' + self.show(node.right) + ' }'
         return repr
 
@@ -135,11 +137,9 @@ class Interpreter(NodeVisitor):
         if bool == True:
             print(arrow + self.show(node.left)+ ', ' + self.get_state())
             self.visit(node.left)
-            #print(arrow + self.show(node.left)+ ', ' + self.get_state())
         else:
             print(arrow + self.show(node.right)+ ', ' + self.get_state())
             self.visit(node.right)
-            #print(arrow + self.show(node.right)+ ', ' + self.get_state())
         node.eval = True
 
     # helper method to return original do statements/commands
@@ -170,9 +170,28 @@ class Interpreter(NodeVisitor):
         repr = 'while ' + self.show(node.left) + ' do ' + '{ ' + do_stmts + ' }'
         return repr  # return the original While clause
 
-    def visit_Commands(self, node):
-        children = node.right.children
-        self.visit(children[0])
+    # helper method to return inner If operation nested in While 'do' clause
+    def visit_inner_if(self, node):
+        arrow = '⇒ '
+        bool = self.visit(node.expr)
+        node.eval = True
+        state = self.get_state()
+        if bool == True:
+            self.visit(node.left)
+            node.left.eval = False
+            return arrow + self.show(node.left), state
+        else:
+            self.visit(node.right)
+            node.right.eval = False
+            return arrow + self.show(node.right), state
+
+    def visit_Commands(self, node):  # input is WhileOp node, not do_commands list
+        children = node.right.children  # do_commands list
+        if type(children[0]).__name__ == 'IfOp':
+            expr, state = self.visit_inner_if(children[0])
+            print(expr + '; ' + self.show(node) + ', ' + state)
+        else:
+            self.visit(children[0])
         if len(children) == 1:
             print('⇒ skip' + '; ' + self.show(node) + ', ' + self.get_state())
         if len(children) > 1:
@@ -191,7 +210,7 @@ class Interpreter(NodeVisitor):
             counter += 1
             if counter > 3333:
                 return
-            self.visit_Commands(node)
+            self.visit_Commands(node)  # evaluate do commands, input WhileOp node, not commands
             print('⇒ ' + self.show(node) + ', ' + self.get_state())
 
         node.eval = True
@@ -233,7 +252,7 @@ class Interpreter(NodeVisitor):
 
 
 def main():
-    text = 'a := 369 ; b := 1107 ; while ¬ ( a = b ) do { if a < b then b := b - a else a := a - b }'
+    text = 'x := 3 ; y := 5; if ( x < y ) then x := x + 1 else x := x - 1'
     #text = input()
 
     lexer = Lexer(text)

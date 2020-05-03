@@ -36,7 +36,7 @@ class Compound(AST):
         self.children = []
 
 class Commands(AST):
-    # inner commands
+    # inner commands for While node
     def __init__(self):
         self.children = []
 

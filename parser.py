@@ -137,7 +137,7 @@ class Parser:
         return IfOp(expr, token, then_stmt)
 
     def while_statement(self):
-        # "while" <expr> "do" <statement>
+        # "while" <expr> "do" <statement | statement_list>
         token = self.current_token
         self.eat(TokenType.WHILE)
         if self.current_token.type == TokenType.LPAREN:
@@ -147,7 +147,7 @@ class Parser:
             self.eat(TokenType.RPAREN)
         self.eat(TokenType.DO)
 
-        right = self.commands()
+        right = self.commands()  # do_statement(s) list
         node = WhileOp(left, token, right)
         return node
 
